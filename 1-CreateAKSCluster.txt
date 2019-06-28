@@ -1,0 +1,42 @@
+    _   _  _____      _          _                        _   
+   /_\ | |/ / __|  __| |___ _ __| |___ _  _ _ __  ___ _ _| |_ 
+  / _ \| ' <\__ \ / _` / -_) '_ \ / _ \ || | '  \/ -_) ' \  _|
+ /_/ \_\_|\_\___/ \__,_\___| .__/_\___/\_, |_|_|_\___|_||_\__|
+                           |_|         |__/                   
+==============================================================
+= Version 1.0
+= Stanislas Quastana
+= 28/06/19
+==============================================================
+
+# you must be connected to your Azure Subscription with the right privilege
+az login
+
+# Create an Azure resource group
+# Documentation : https://docs.microsoft.com/en-us/cli/azure/group?view=azure-cli-latest#az-group-create
+az group create --name RG-AKS-K2-Stan --location westeurope
+
+# Define a Windows password
+PASSWORD_WIN="PutHereYour$ecurePassword:)"
+
+# Create an AKS cluster with 2 to 4 linux nodes pool and autoscaling
+# Documentation : https://docs.microsoft.com/en-us/cli/azure/ext/aks-preview/aks?view=azure-cli-latest#ext-aks-preview-az-aks-create
+
+az aks create \
+    --resource-group RG-AKS-K2-Stan \
+    --name AKS-K2-Stan \
+    --kubernetes-version 1.14.0 \
+    --generate-ssh-keys \
+    --windows-admin-password $PASSWORD_WIN \
+    --windows-admin-username azureuser \
+    --enable-vmss \
+    --enable-cluster-autoscaler \
+    --min-count 2 \
+    --max-count 4  \
+    --network-plugin azure \
+    --network-policy azure \
+    --load-balancer-sku standard \
+    --node-zones {1,2,3} \
+    --location westeurope
+
+

@@ -1,0 +1,16 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: test.specialk8s.shop
+  namespace: default
+spec:
+  secretName: test.specialk8s.shop-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: test.specialk8s.shop
+  acme:
+    config:
+    - http01: {}
+      domains:
+      - test.specialk8s.shop

@@ -1,0 +1,102 @@
+  ___                         
+ |_ _|_ _  __ _ _ _ ___ ______
+  | || ' \/ _` | '_/ -_|_-<_-<
+ |___|_||_\__, |_| \___/__/__/
+          |___/               
+
+==============================================================
+= Version 1.0
+= Stanislas Quastana
+= 28/06/19
+==============================================================
+
+Documentation : https://kubernetes.github.io/ingress-nginx/
+
+You need the following Kubernetes Resources :
+- a Service : https://kubernetes.io/docs/concepts/services-networking/service/
+- an Ingress : https://kubernetes.io/docs/concepts/services-networking/ingress/
+- a Configmap
+- an Ingress Controller
+
+
+    internet
+        |
+   [ Ingress ]
+   --|-----|--
+   [ Services ]
+
+
+
+# Create a service (aka Load Balancer) for nginx-basicdeployment
+kubectl apply -f Service-Deployment-nginx.yml
+
+# Create a namespace for nginx ingress controler
+kubectl apply -f ingress-nginx-namespace.yml
+
+# Create an Ingress Controller, first prerequisites
+# Mandatory command to execute to prepare prerequisites for nginx ingress in Kubernetes
+# this will create configmap, clusterrolebinding, ngninx pod...
+# documentation : https://kubernetes.github.io/ingress-nginx/deploy/#prerequisite-generic-deployment-command
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+
+# Create an Ingress Controller in Azure, Azure Load Balancer and Azure Public IP
+# it creates an external service (in Azure : an Azure LB + a public IP)
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+
+# Check IP adress of Ingress Controller (Service) - replay following command until you get an external IP
+kubectl get service -n ingress-nginx
+
+# Create an Ingress
+kubectl apply -f Ingress.yml
+
+# Check your Ingress  (repeat until you get the public IP in the result of the following command)
+kubectl get ingress
+
+# Check pods that are running ingress-ngnix
+kubectl get pods --all-namespaces -l app.kubernetes.io/name=ingress-nginx --watch
+
+# Open a web browser and connect to ingress IP, continue even it is http
+# You should get a bad gateway message
+
+# To detect which version of the ingress controller is running, exec into the pod and run nginx-ingress-controller version command
+POD_NAMESPACE=ingress-nginx
+POD_NAME=$(kubectl get pods -n $POD_NAMESPACE -l app.kubernetes.io/name=ingress-nginx -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -it $POD_NAME -n $POD_NAMESPACE -- /nginx-ingress-controller --version
+
+
+***************************************************************************
+*** Other way to Deploy an ngnix ingress controller with Helm *************
+helm install stable/nginx-ingress --name my-nginx
+
+if your Kubernetes cluster has RBAC enabled (that would be a good idea and
+this is Azure Kubernetes Service default setting)
+helm install stable/nginx-ingress --name my-nginx --set rbac.create=true
+***************************************************************************
+
+
+// Configure ingress to accept only url with your domain name
+
+# on your DNS zone create a A DNS record that match to your Ingress public IP 
+ex: test.specialk8s.shop 
+
+Documentation : https://docs.microsoft.com/en-us/cli/azure/network/dns/record-set/a?view=azure-cli-latest#az-network-dns-record-set-a-add-record
+If you use Azure DNS
+ex :
+az network dns record-set a add-record --ipv4-address 40.74.35.10 --record-set-name test --resource-group rg-meszonesdns --zone-name specialk8s.shop --subscription "Insert here the name of your Azure Subscription"
+
+
+# modify host line in Ingress-version2.yml to match your FQDN. save changes.
+kubectl apply -f Ingress-version2.yml
+
+# Open a browser and try to connect to http://ipaddress
+You should get a 404 Not Found
+
+# Open a browser and try to connect to http://yourfqdn
+It should work
+
+
+# Now we will activate HTTPS by modifying Ingress object to use Kubernetes autosigned certificate. Edit Ingress-version3-selfsigned.yml and change host name with your fqdn
+kubectl apply -f Ingress-version3-selfsigned.yml
+
+# Open a browser and try to connect to https://yourfqdn
+It should work, open certificate info to check that certificate is a Kubernetes self signed certificate

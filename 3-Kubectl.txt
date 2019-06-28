@@ -1,0 +1,42 @@
+
+  _        _            _   _ 
+ | |___  _| |__  ___ __| |_| |
+ | / / || | '_ \/ -_) _|  _| |
+ |_\_\\_,_|_.__/\___\__|\__|_|
+                              
+
+==============================================================
+= Version 1.0
+= Stanislas Quastana
+= 28/06/19
+==============================================================
+
+
+# Get all AKS cluster of the Azure Subscription
+az aks list
+
+# Get Kubeconfig of your cluster
+az aks get-credentials --resource-group RG-AKS-K2-Stan --name AKS-K2-Stan
+
+# Check your kubectl version (must be > 1.14)
+kubectl version
+
+# Get nodes
+kubectl get nodes
+
+# Get deployment for all namespaces
+kubectl get deploy --all-namespaces
+
+# Open a ssh tunnel to Kubernetes dashboard
+az aks browse --resource-group RG-AKS-K2-Stan --name AKS-K2-Stan
+
+# Open a browser and connect to http://127.0.0.1:8001
+# you should have error message like configmap is forbidden...
+
+# Give access to K8S Dashboard (that should not work if Kubernetes RBAC is enable)
+# documentation : https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard
+kubectl create clusterrolebinding kubernetes-dashboard --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
+
+# Return on your browser on http://127.0.0.1:8001 (or refresh page with F5)
+# it should be better :)
+

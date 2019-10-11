@@ -17,7 +17,19 @@ az login
 az group create --name RG-AKS-K2-Stan --location westeurope
 
 # Define a Windows password
-PASSWORD_WIN="PutHereYour$ecurePassword:)"
+echo "Enter win password"
+read PASSWORD_WIN
+
+echo "enter service principal"
+read SERVICE_PRINCIPAL
+
+echo "enter client secret"
+read CLIENT_SECRET
+
+echo "enter Kubernetes version"
+read K8S_version
+
+
 
 # Create an AKS cluster with 2 to 4 linux nodes pool and autoscaling
 # Documentation : https://docs.microsoft.com/en-us/cli/azure/ext/aks-preview/aks?view=azure-cli-latest#ext-aks-preview-az-aks-create
@@ -25,7 +37,7 @@ PASSWORD_WIN="PutHereYour$ecurePassword:)"
 az aks create \
     --resource-group RG-AKS-K2-Stan \
     --name AKS-K2-Stan \
-    --kubernetes-version 1.14.0 \
+    --kubernetes-version $K8S_version \
     --generate-ssh-keys \
     --windows-admin-password $PASSWORD_WIN \
     --windows-admin-username azureuser \
@@ -37,6 +49,6 @@ az aks create \
     --network-policy azure \
     --load-balancer-sku standard \
     --node-zones {1,2,3} \
-    --location westeurope
+    --location westeurope --service-principal $SERVICE_PRINCIPAL --client-secret $CLIENT_SECRET
 
 

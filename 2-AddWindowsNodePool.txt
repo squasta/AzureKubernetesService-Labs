@@ -17,6 +17,10 @@ az aks nodepool add \
     --os-type Windows \
     --name npwin \
     --node-count 1 \
-    --kubernetes-version 1.14.0
+    --kubernetes-version $K8S_version
 
+name=`kubectl get nodes -l beta.kubernetes.io/os=linux -o=jsonpath='{.items[0].metadata.name}'`
+
+#Cordon the node so that we don't deploy additional workload during the rest of the workshop
+kubcetl cordon $name
 

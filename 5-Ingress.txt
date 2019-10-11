@@ -26,6 +26,8 @@ You need the following Kubernetes Resources :
    [ Services ]
 
 
+#apply cordon on windows node
+kubectl cordon node
 
 # Create a service (aka Load Balancer) for nginx-basicdeployment
 kubectl apply -f Service-Deployment-nginx.yml

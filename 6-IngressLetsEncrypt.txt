@@ -6,9 +6,9 @@
           |___/                                                 |__/|_|       
 
 ==============================================================
-= Version 1.0
+= Version 2.0
 = Stanislas Quastana
-= 28/06/19
+= 14/10/19
 ==============================================================
 
 
@@ -19,14 +19,143 @@ In this tutorial I made 2 versions :
 - One version use staging Let's encrypt API : perfect for testing but the certificate is not a "real trusted one" that you can trust for production
 - One version use production Let's Encrypt API that you can you for production
 
+# First, you will install cert-manager that will manage for you cert request to letsencrypt
 
+# create a namespace for cert-manager
+kubectl apply -f cert-manager-namespace.yml
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
+
+# Switch to cert-manager namespace
+kubectl config set-context --current --namespace=cert-manager
+
+# Install the CustomResourceDefinitions and cert-manager itself
+# source : https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html
+# If you are running Kubernetes v1.15 or below, you will need to add the --validate=false flag to your kubectl apply command above else you will receive a validation error relating to the x-kubernetes-preserve-unknown-fields field in our CustomResourceDefinition resources. This is a benign error and occurs due to the way kubectl performs resource validation
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.11.0/cert-manager.yaml --validate=false
+
+# Check cert-manager installation
+kubectl get pods --namespace cert-manager
+
+# Test if cert-manager is working correctly
+
+# Create a test certificate
+kubectl apply -f test-cert-manager.yaml
+
+# Check the status of the newly created certificate
+# You may need to wait a few seconds before cert-manager processes the
+# certificate request
+kubectl describe certificate -n cert-manager-test
+
+# a certificate should have been issued with success
+# now Clean up the test resources
+kubectl delete -f test-cert-manager.yaml
+
+bypass "version with Lets Encrypt Staging API" (I have still an issue I can solve)
+and go directly to "Version with Lets Encrypt Production API"
+
+
+//////////////////////////////////////////////
+// Version with Lets Encrypt Staging API   //
+/////////////////////////////////////////////
+
+# Switch to default namespace
+kubectl config set-context --current --namespace=default
+
+# create a ClusterIssuer
+# It does not matter which namespace your Ingress resides, as ClusterIssuers are non-namespaced resource
+# Documentation : https://docs.cert-manager.io/en/latest/tasks/issuers/setup-acme/index.html
+kubectl apply -f letsencrypt-staging-cluster-issuer.yml
+
+# check the ‘Ready’ condition
+kubectl describe clusterissuer letsencrypt-staging
+
+# Any Certificate you create that references this Issuer resource will use the HTTP01 challenge solver you have configured above.
+# Important : Let’s Encrypt does not support issuing wildcard certificates with HTTP-01 challenges. To issue wildcard certificates, you must use the DNS-01 challenge.
+
+# It is time to test avec a test certificate (Issuer is letsencrypt-staging-cluster-issuer)
+# Edit certificate4mywebserver-staging.yml and put your hostname (fqdn) next to name,  secretname, commonName and domains
+kubectl apply -f certificate4mywebserver-staging.yml
+
+# Finaly update Ingress to use this new certificate
+# Edit file Ingress-version4-letsencrypt.yml : change secretname & hostnames to reflect yours !!!
+kubectl apply -f Ingress-version4-letsencrypt.yml
+
+kubectl get certificate
+kubectl describe certificate labtest.specialk8s.shop
+
+==> you should have 2 certificates : first one was the selfsigned by Kubernetes (in previous lab), the second one was delivered by Let's Encrypt Staging
+
+Open a brower and connect to https://yourdomainname
+ex: labtest.specialk8s.shop
+Open certificate to check Issuer of the certificate. It should be Fake LE Intermediate X1
+
+
+
+//////////////////////////////////////////////
+// Version with Lets Encrypt Production API //
+/////////////////////////////////////////////
+
+# production Let's Encrypt server API is : https://acme-v02.api.letsencrypt.org/directory
+
+# create a ClusterIssuer
+# It does not matter which namespace your Ingress resides, as ClusterIssuers are non-namespaced resource
+# Documentation : https://docs.cert-manager.io/en/latest/tasks/issuers/setup-acme/index.html
+kubectl apply -f letsencrypt-prod-cluster-issuer.yml
+
+#check the list of cluster issuer
+kubectl get clusterissuer
+
+# check the ‘Ready’ condition
+kubectl describe clusterissuer letsencrypt-prod
+
+Any Certificate you create that references this Issuer resource will use the HTTP01 challenge solver you have configured above.
+Important : Let’s Encrypt does not support issuing wildcard certificates with HTTP-01 challenges. To issue wildcard certificates, you must use the DNS-01 challenge.
+
+# It is time to get a real certificate (Issuer is letsencrypt-prod cluster issuer)
+
+# Edit certificate4mywebserver-production.yml and put your hostname (fqdn) next to name,  secretname, commonName and domains
+
+kubectl apply -f certificate4mywebserver-production.yml
+
+# Finaly update Ingress to use this new certificate
+Edit file Ingress-version5-letsencrypt-prod.yml : change secretname & hostnames to reflect yours
+
+kubectl apply -f Ingress-version5-letsencrypt-prod.yml
+
+kubectl get certificate
+
+==> you should have 2 certificates : first one (your domain name) is a temporary self signed certificate used to create order resource, the second one (your domain name-tls) is delivered by Let's Encrypt Production CA
+
+Open a brower and connect to https://yourdomainname
+ex: web.specialk8s.shop
+Open certificate to check Issuer of the certificate. It should be Let's Encrypt Authority X3
+
+
+
+
+
+
+
+
+
+
+
+## Not re tested on version 2.0
+# ========== only if you prefer to setup with Helm ===========================
+# If you prefer to install cert-manager with Helm, :
+# Install the server part of Helm (Tiller) on the Kubernetes Cluster. 
+# Helm is intended to run on Linux nodes so just in the case we have a mixted cluster (Linux and Windows) we use a --node-selectors
+# helm init --service-account tiller --node-selectors "kubernetes.io/os"="linux"
+# Find helm charts with helm search command. To be sure that the list of chart is up to date :
+# helm repo update
+# Now install Cert-manager using Helm
+# documentation : https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html#installing-with-helm
+# =============================================================================
 
 # To deploy cert-manager, the easy way is to use an Helm chart.
 # Helm is a package manager for Kubernetes. There are three parts to Helm: The Helm client (helm) the Helm server (Tiller) and the Charts themselves.
 
-
 # First you need to give Tiller some permissions on the cluster (because your Kubernetes cluster has RBAC enabled) so you will create a serviceaccount and un clusterrolebiding
-
 Documentation : https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 
 tiller-serviceaccount.yml
@@ -56,139 +185,3 @@ subjects:
     namespace: kube-system
 
 kubectl apply -f tiller-ClusterRoleBinding.yml
-
-
-# Next is to install the server part of Helm (Tiller) on the Kubernetes Cluster. 
-# Helm is intended to run on Linux nodes so just in the case we have a mixted cluster (Linux and Windows) we use a --node-selectors
-
-helm init --service-account tiller --node-selectors "beta.kubernetes.io/os"="linux"
-
-Find helm charts with helm search command. To be sure that the list of chart is up to date :
-helm repo update
-
-
-# Now install Cert-manager using Helm
-# documentation : https://hub.helm.sh/charts/jetstack/cert-manager
-
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.8/deploy/manifests/00-crds.yaml
-
-cert-manager-namespace.yml
---------------------------
-apiVersion: v1
-kind: Namespace
-metadata:
-  name:  cert-manager
-
-kubectl apply -f cert-manager-namespace.yml
-
-kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
-
-# Add the Jetstack Helm repository
-helm repo add jetstack https://charts.jetstack.io
-
-# Install the cert-manager helm chart
-# additionnal documentation : https://docs.cert-manager.io/en/latest/tasks/issuing-certificates/ingress-shim.html
-# https://docs.cert-manager.io/en/latest/tasks/issuers/index.html
-
-helm install --name cert-manager --namespace cert-manager jetstack/cert-manager
-
-
-//////////////////////////////////////////////
-// Version with Lets Encrypt Staging API   //
-/////////////////////////////////////////////
-
-# create a ClusterIssuer
-# It does not matter which namespace your Ingress resides, as ClusterIssuers are non-namespaced resource
-# Documentation : https://docs.cert-manager.io/en/latest/tasks/issuers/setup-acme/index.html
-
-kubectl apply -f letsencrypt-staging-cluster-issuer.yml
-
-# check the ‘Ready’ condition
-kubectl describe clusterissuer letsencrypt-staging
-
-Any Certificate you create that references this Issuer resource will use the HTTP01 challenge solver you have configured above.
-Important : Let’s Encrypt does not support issuing wildcard certificates with HTTP-01 challenges. To issue wildcard certificates, you must use the DNS-01 challenge.
-
-# It is time to test avec a test certificate (Issuer is letsencrypt-staging-cluster-issuer)
-
-Edit certificate4mywebserver-staging.yml and put your hostname (fqdn) next to name,  secretname, commonName and domains
-
-kubectl apply -f certificate4mywebserver-staging.yml
-
-# Finaly update Ingress to use this new certificate
-Edit file : change secretname & hostnames to reflect yours
-
-kubectl apply -f Ingress-version4-letsencrypt.yml
-
-kubectl get certificate
-
-==> you should have 2 certificates : first one was the selfsigned by Kubernetes, the second one was delivered by Let's Encrypt Staging
-
-Open a brower and connect to https://yourdomainname
-ex: test.specialk8s.shop
-Open certificate to check Issuer of the certificate. It should be Fake LE Intermediate X1
-
-
-
-//////////////////////////////////////////////
-// Version with Lets Encrypt Production API //
-/////////////////////////////////////////////
-
-# production Let's Encrypt server API is : https://acme-v02.api.letsencrypt.org/directory
-
-# create a ClusterIssuer
-# It does not matter which namespace your Ingress resides, as ClusterIssuers are non-namespaced resource
-# Documentation : https://docs.cert-manager.io/en/latest/tasks/issuers/setup-acme/index.html
-
-kubectl apply -f letsencrypt-prod-cluster-issuer.yml
-
-#check the list of cluster issuer
-kubectl get clusterissuer
-
-# check the ‘Ready’ condition
-kubectl describe clusterissuer letsencrypt-prod
-
-Any Certificate you create that references this Issuer resource will use the HTTP01 challenge solver you have configured above.
-Important : Let’s Encrypt does not support issuing wildcard certificates with HTTP-01 challenges. To issue wildcard certificates, you must use the DNS-01 challenge.
-
-
-# It is time to get a real certificate (Issuer is letsencrypt-prod cluster issuer)
-
-Edit certificate4mywebserver-production.yml and put your hostname (fqdn) next to name,  secretname, commonName and domains
-
-kubectl apply -f certificate4mywebserver-production.yml
-
-# Finaly update Ingress to use this new certificate
-Edit file Ingress-version5-letsencrypt-prod.yml : change secretname & hostnames to reflect yours
-
-kubectl apply -f Ingress-version5-letsencrypt-prod.yml
-
-kubectl get certificate
-
-==> you should have 2 certificates : first one (your domain name) is a temporary self signed certificate used to create order resource, the second one (your domain name-tls) is delivered by Let's Encrypt Production CA
-
-Open a brower and connect to https://yourdomainname
-ex: test.specialk8s.shop
-Open certificate to check Issuer of the certificate. It should be Let's Encrypt Authority X3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

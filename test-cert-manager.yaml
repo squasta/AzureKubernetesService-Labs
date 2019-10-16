@@ -1,0 +1,25 @@
+# Purpose of this yaml is to check if cert-manager works correctly
+# source : https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html#verifying-the-installation
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager-test
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: test-selfsigned
+  namespace: cert-manager-test
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: selfsigned-cert
+  namespace: cert-manager-test
+spec:
+  commonName: example.com
+  secretName: selfsigned-cert-tls
+  issuerRef:
+    name: test-selfsigned

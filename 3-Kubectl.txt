@@ -6,9 +6,9 @@
                               
 
 ==============================================================
-= Version 1.0
+= Version 2.0
 = Stanislas Quastana
-= 28/06/19
+= 16/10/19
 ==============================================================
 
 
@@ -16,7 +16,7 @@
 az aks list
 
 # Get Kubeconfig of your cluster
-az aks get-credentials --resource-group RG-AKS-K2-Stan --name AKS-K2-Stan
+az aks get-credentials --resource-group $RG_NAME --name $CLUSTERK8S_NAME
 
 # Check your kubectl version (must be > 1.14)
 kubectl version
@@ -24,14 +24,23 @@ kubectl version
 # Get nodes
 kubectl get nodes
 
+# Get windows nodes (here this only one)
+WINDOWS_NODE_NAME=`kubectl get nodes -l kubernetes.io/os=windows -o=jsonpath='{.items[0].metadata.name}'`
+
+# now, you apply a cordon around Windows nodes to be sure that no future pod deployments (in this lab) goes on Windows Nodes
+# cf. https://kubernetes.io/docs/concepts/architecture/nodes/#manual-node-administration
+# Marking a node as unschedulable prevents new pods from being scheduled to that node, but does not affect any existing pods on the node. This is useful as a preparatory step before a node reboot, etc.
+kubectl cordon $WINDOWS_NODE_NAME
+
 # Get deployment for all namespaces
 kubectl get deploy --all-namespaces
 
 # Open a ssh tunnel to Kubernetes dashboard
-az aks browse --resource-group RG-AKS-K2-Stan --name AKS-K2-Stan
+az aks browse --resource-group $RG_NAME --name $CLUSTERK8S_NAME
 
 # Open a browser and connect to http://127.0.0.1:8001
 # you should have error message like configmap is forbidden...
+# This is normal : Kubernetes RBAC is enabled by default on AKS
 
 # Give access to K8S Dashboard (that should not work if Kubernetes RBAC is enable)
 # documentation : https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard

@@ -6,9 +6,9 @@
              |_|                                          
 
 ==============================================================
-= Version 1.0
+= Version 2.0
 = Stanislas Quastana
-= 28/06/19
+= 16/10/19
 ==============================================================
 
 # Documentation : https://docs.microsoft.com/en-us/cli/azure/ext/aks-preview/aks?view=azure-cli-latest#ext-aks-preview-az-aks-create
@@ -28,8 +28,9 @@ az feature register --name PodSecurityPolicyPreview --namespace Microsoft.Contai
 az feature register --namespace "Microsoft.ContainerService" --name "AKSAzureStandardLoadBalancer"
 az feature register --namespace "Microsoft.ContainerService" --name "AvailabilityZonePreview"
 az feature register --namespace "Microsoft.ContainerService" --name "EnableNetworkPolicy"
+az feature register --name MSIPreview --namespace Microsoft.ContainerService
 
-# Check registration state for all aks preview features
+# Check registration state for all aks preview features you want to register
 az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/')].{Name:name,State:properties.state}"
 
 # /!\ only When all feature are marked as Registered, ReRegister ContainerService provider

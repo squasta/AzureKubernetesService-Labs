@@ -1,13 +1,14 @@
-apiVersion: extensions/v1beta1
+# Nouvelle version 
+# source : https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: my-ingress
   annotations:
-    # use the shared ingress-nginx
-    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: test.specialk8s.shop
+  - host: labtest.specialk8s.shop
     http:
       paths:
       - path: /

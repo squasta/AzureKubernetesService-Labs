@@ -5,22 +5,25 @@
  /_/ \_\__,_\__,_|   \_/\_/ |_|_||_\__,_\___/\_/\_//__/ |_|\_\___/\__,_\___/__/
                                                                                
 ==============================================================
-= Version 1.0
+= Version 2.0
 = Stanislas Quastana
-= 28/06/19
+= 16/10/19
 ==============================================================
                                                                                              
 # Add an Windows node pool
 az aks nodepool add \
-    --resource-group RG-AKS-K2-Stan \
-    --cluster-name AKS-K2-Stan \
+    --resource-group $RG_NAME \
+    --cluster-name $CLUSTERK8S_NAME \
     --os-type Windows \
     --name npwin \
     --node-count 1 \
-    --kubernetes-version $K8S_version
+    --kubernetes-version $K8S_VERSION
 
-name=`kubectl get nodes -l beta.kubernetes.io/os=linux -o=jsonpath='{.items[0].metadata.name}'`
+# check node pools on your AKS cluster
+az aks nodepool list --cluster-name $CLUSTERK8S_NAME --resource-group $RG_NAME
 
-#Cordon the node so that we don't deploy additional workload during the rest of the workshop
-kubcetl cordon $name
+# Windows Nodes are used to run Windows Containers
+# Official Windows based images in Docker Hub : https://hub.docker.com/search?q=windows&type=image&image_filter=store%2Cofficial
+
+
 

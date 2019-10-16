@@ -1,16 +1,13 @@
-apiVersion: certmanager.k8s.io/v1alpha1
+# source : https://docs.cert-manager.io/en/latest/tutorials/acme/http-validation.html 
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: test.specialk8s.shop
-  namespace: default
+  name: labtest.specialk8s.shop
+  # namespace: default
 spec:
-  secretName: test.specialk8s.shop-tls
+  secretName: labtest.specialk8s.shop-tls
   issuerRef:
-    name: letsencrypt-staging-cluster-issuer
-    kind: ClusterIssuer
-  commonName: test.specialk8s.shop
-  acme:
-    config:
-    - http01: {}
-      domains:
-      - test.specialk8s.shop
+    name: letsencrypt-staging
+  commonName: labtest.specialk8s.shop
+  dnsNames:
+  - labtest.specialk8s.shop

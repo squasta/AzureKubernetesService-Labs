@@ -1,10 +1,10 @@
-apiVersion: extensions/v1beta1
+# source : https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: my-ingress
   annotations:
-    # use the shared ingress-nginx
-    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - http:
@@ -13,3 +13,22 @@ spec:
         backend:
           serviceName: service-basic-nginx
           servicePort: 80
+
+
+
+# Old version
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: my-ingress
+#   annotations:
+#     # use the shared ingress-nginx
+#     kubernetes.io/ingress.class: "nginx"
+# spec:
+#   rules:
+#   - http:
+#       paths:
+#       - path: /
+#         backend:
+#           serviceName: service-basic-nginx
+#           servicePort: 80

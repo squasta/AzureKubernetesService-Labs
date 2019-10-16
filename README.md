@@ -10,3 +10,5 @@ This repo contains some hands on labs to play with Azure Kubernetes Services
 - Lab 6 : Configure Ingress with a Let's Encrypt certificate
 
 You need : an Azure Subscription, Azure CLI [https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest], Helm [https://github.com/helm/helm/releases], Kubectl [https://kubernetes.io/docs/tasks/tools/install-kubectl/], a nice text editor like VSCode [https://code.visualstudio.com/] and a web browser
+
+A DNS Zone where you can add A record is also necessary for the end of Lab 5 and for Lab 6

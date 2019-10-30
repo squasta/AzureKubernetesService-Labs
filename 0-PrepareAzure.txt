@@ -6,10 +6,16 @@
              |_|                                          
 
 ==============================================================
-= Version 2.0
+= Version 2.1
 = Stanislas Quastana
-= 16/10/19
+= 30/10/19
 ==============================================================
+
+# First check that you are connected on the right Azure Subscription. List all subscription and check which one is default
+az account list -o table
+
+# If you are not set on the right Azure subscription, change to the right one
+az account set --subscription "insert here the name or the ID of your subscription" 
 
 # Documentation : https://docs.microsoft.com/en-us/cli/azure/ext/aks-preview/aks?view=azure-cli-latest#ext-aks-preview-az-aks-create
 

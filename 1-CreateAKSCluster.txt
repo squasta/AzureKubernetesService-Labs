@@ -12,6 +12,12 @@
 # you must be connected to your Azure Subscription with the right privileges (you need to have the appropriate role to create Resource Group, VM..)
 az login
 
+# Check vm size available on the Azure Region where you want to deploy
+az vm list-sizes --location nameofAzureRegion -o table
+
+# Check your quota available on the Azure Region where you want to deploy
+az vm list-usage --location nameofAzureRegion -o table
+
 # Define an Azure Resource Group name
 RG_NAME="RG-AKS-TEST-LAB"
 
@@ -40,8 +46,10 @@ K8S_VERSION="1.14.7"
 # Define a cluster name
 CLUSTERK8S_NAME="AKS-TEST-LAB"
 
-# Create an AKS cluster with 3 to 5 linux nodes pool and autoscaling
+# Create an AKS cluster with 2 to 4 linux nodes pool and autoscaling
 # Documentation : https://docs.microsoft.com/en-us/cli/azure/ext/aks-preview/aks?view=azure-cli-latest#ext-aks-preview-az-aks-create
+
+# Note : you can change the default VM size (by default Standard_DS2_v2) by adding  --node-vm-size "NameOfSelectedVMSize" to the following command line
 
 az aks create \
     --resource-group $RG_NAME \
@@ -52,8 +60,8 @@ az aks create \
     --windows-admin-username azureuser \
     --enable-vmss \
     --enable-cluster-autoscaler \
-    --min-count 3 \
-    --max-count 5  \
+    --min-count 2 \
+    --max-count 4  \
     --network-plugin azure \
     --network-policy azure \
     --load-balancer-sku standard \

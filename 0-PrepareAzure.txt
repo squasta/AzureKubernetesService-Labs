@@ -19,6 +19,8 @@ az account set --subscription "insert here the name or the ID of your subscripti
 
 # Documentation : https://docs.microsoft.com/en-us/cli/azure/ext/aks-preview/aks?view=azure-cli-latest#ext-aks-preview-az-aks-create
 
+# Check your Azure CLI version. It must be 2.0.76 or more
+
 # add aks extension for AKS preview feature
 az extension add --name aks-preview
 az extension update --name aks-preview

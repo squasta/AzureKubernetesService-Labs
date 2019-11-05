@@ -49,6 +49,8 @@ CLUSTERK8S_NAME="AKS-TEST-LAB"
 
 # Important : From 2019-11-04 the CLI extension will have a new parameter --zones to replace --node-zones, which specifies the zones to be used by the cluster nodes.
 # Source : https://github.com/Azure/AKS/blob/master/CHANGELOG.md#release-2019-10-28
+# if your Azure CLI is version 2.0.75 or less, use --node-zones instead of --zones
+# To check your Azure CLI version : az --version
 
 az aks create \
     --resource-group $RG_NAME \
@@ -62,7 +64,7 @@ az aks create \
     --network-plugin azure \
     --network-policy azure \
     --load-balancer-sku standard \
-    --node-zones {1,2,3} \
+    --zones {1,2,3} \
     --location westeurope \
     --service-principal $SERVICE_PRINCIPAL --client-secret $CLIENT_SECRET \
     --enable-managed-identity

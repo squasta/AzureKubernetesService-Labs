@@ -24,14 +24,6 @@ kubectl version
 # Get nodes
 kubectl get nodes
 
-# Get windows nodes (here this only one)
-WINDOWS_NODE_NAME=`kubectl get nodes -l kubernetes.io/os=windows -o=jsonpath='{.items[0].metadata.name}'`
-
-# now, you apply a cordon around Windows nodes to be sure that no future pod deployments (in this lab) goes on Windows Nodes
-# cf. https://kubernetes.io/docs/concepts/architecture/nodes/#manual-node-administration
-# Marking a node as unschedulable prevents new pods from being scheduled to that node, but does not affect any existing pods on the node. This is useful as a preparatory step before a node reboot, etc.
-kubectl cordon $WINDOWS_NODE_NAME
-
 # Get deployment for all namespaces
 kubectl get deploy --all-namespaces
 

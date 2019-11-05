@@ -25,5 +25,12 @@ az aks nodepool list --cluster-name $CLUSTERK8S_NAME --resource-group $RG_NAME
 # Windows Nodes are used to run Windows Containers
 # Official Windows based images in Docker Hub : https://hub.docker.com/search?q=windows&type=image&image_filter=store%2Cofficial
 
+# Get windows nodes (here this only one)
+WINDOWS_NODE_NAME=`kubectl get nodes -l kubernetes.io/os=windows -o=jsonpath='{.items[0].metadata.name}'`
+
+# now, you apply a cordon around Windows nodes to be sure that no future pod deployments (in this lab) goes on Windows Nodes
+# cf. https://kubernetes.io/docs/concepts/architecture/nodes/#manual-node-administration
+# Marking a node as unschedulable prevents new pods from being scheduled to that node, but does not affect any existing pods on the node. This is useful as a preparatory step before a node reboot, etc.
+kubectl cordon $WINDOWS_NODE_NAME
 
 

@@ -1,9 +1,11 @@
 # Azure Kubernetes Service Hands on Labs
 
+Update : 5th november 19
+
 This repo contains some hands on labs to play with Azure Kubernetes Services 
 
+- Lab 0 : Prepare your Azure CLI & Azure Subscription
 - Lab 1 : Create an Azure Kubernetes Cluster with Azure CLI
-- Lab 2 : Add a Windows node Pool to your AKS cluster
 - Lab 3 : kubectl basics
 - Lab 4 : A basic deployment 
 - Lab 5 : Deploy an Ingress / an nginx Ingress Controller / a Service

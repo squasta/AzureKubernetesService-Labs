@@ -68,5 +68,6 @@ az aks create \
     --location westeurope \
     --service-principal $SERVICE_PRINCIPAL --client-secret $CLIENT_SECRET \
     --enable-managed-identity
+    --debug
 
 

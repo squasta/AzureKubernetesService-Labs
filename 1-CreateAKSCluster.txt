@@ -47,6 +47,9 @@ CLUSTERK8S_NAME="AKS-TEST-LAB"
 
 # Note : you can change the default VM size (by default Standard_DS2_v2) by adding  --node-vm-size "NameOfSelectedVMSize" to the following command line
 
+# Important : From 2019-11-04 the CLI extension will have a new parameter --zones to replace --node-zones, which specifies the zones to be used by the cluster nodes.
+# Source : https://github.com/Azure/AKS/blob/master/CHANGELOG.md#release-2019-10-28
+
 az aks create \
     --resource-group $RG_NAME \
     --name $CLUSTERK8S_NAME \
@@ -59,7 +62,7 @@ az aks create \
     --network-plugin azure \
     --network-policy azure \
     --load-balancer-sku standard \
-    --zones {1,2,3} \
+    --node-zones {1,2,3} \
     --location westeurope \
     --service-principal $SERVICE_PRINCIPAL --client-secret $CLIENT_SECRET \
     --enable-managed-identity

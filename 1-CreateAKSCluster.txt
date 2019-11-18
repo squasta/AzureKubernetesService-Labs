@@ -59,6 +59,7 @@ az aks create \
     --generate-ssh-keys \
     --enable-vmss \
     --enable-cluster-autoscaler \
+    --node-count 3 \
     --min-count 2 \
     --max-count 4  \
     --network-plugin azure \

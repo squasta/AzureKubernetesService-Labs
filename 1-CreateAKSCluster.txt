@@ -57,7 +57,6 @@ az aks create \
     --name $CLUSTERK8S_NAME \
     --kubernetes-version $K8S_VERSION \
     --generate-ssh-keys \
-    --enable-vmss \
     --enable-cluster-autoscaler \
     --node-count 3 \
     --min-count 2 \
@@ -68,7 +67,6 @@ az aks create \
     --zones {1,2,3} \
     --location westeurope \
     --service-principal $SERVICE_PRINCIPAL --client-secret $CLIENT_SECRET \
-    --enable-managed-identity
     --debug
 
 

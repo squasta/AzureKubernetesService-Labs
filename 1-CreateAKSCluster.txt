@@ -57,10 +57,11 @@ az aks create \
     --name $CLUSTERK8S_NAME \
     --kubernetes-version $K8S_VERSION \
     --generate-ssh-keys \
+    --vm-set-type VirtualMachineScaleSets \
     --enable-cluster-autoscaler \
-    --node-count 3 \
-    --min-count 2 \
-    --max-count 4  \
+    --node-count 2 \
+    --min-count 1 \
+    --max-count 2  \
     --network-plugin azure \
     --network-policy azure \
     --load-balancer-sku standard \

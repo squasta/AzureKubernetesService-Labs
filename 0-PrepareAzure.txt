@@ -6,9 +6,9 @@
              |_|                                          
 
 ==============================================================
-= Version 2.2
+= Version 2.3
 = Stanislas Quastana
-= 05/11/19
+= 02/19/20
 ==============================================================
 
 # First check that you are connected on the right Azure Subscription. List all subscription and check which one is default
@@ -27,10 +27,7 @@ az extension update --name aks-preview
 
 # register for AKS preview features
 az feature register -n WindowsPreview --namespace Microsoft.ContainerService
-az feature register -n AKSLockingDownEgressPreview --namespace Microsoft.ContainerService
-az feature register --name AKSAuditLog --namespace Microsoft.ContainerService
 az feature register --name PodSecurityPolicyPreview --namespace Microsoft.ContainerService
-az feature register --namespace "Microsoft.ContainerService" --name "EnableNetworkPolicy"
 az feature register --name MSIPreview --namespace Microsoft.ContainerService
 
 # Check registration state for all aks preview features you want to register
